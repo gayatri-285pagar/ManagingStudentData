@@ -1,0 +1,86 @@
+[
+  {
+    "id": 2,
+    "name": "Rahul",
+    "email": "rahul@example.com",
+    "subjects": {
+      "Mathematics": 78,
+      "Science": 88,
+      "History": 67
+    },
+    "average": 77.66666666666667,
+    "grade": "A"
+  },
+  {
+    "id": 3,
+    "name": "Mohit",
+    "email": "mohit@example.com",
+    "subjects": {
+      "Mathematics": 88,
+      "Science": 89,
+      "History": 77
+    },
+    "average": 84.66666666666667,
+    "grade": "A"
+  },
+  {
+    "id": 5,
+    "name": "Vaishali",
+    "email": "vaish@example.com",
+    "subjects": {
+      "Mathematics": 98,
+      "Science": 99,
+      "History": 77
+    },
+    "average": 91.33333333333333,
+    "grade": "A+"
+  },
+  {
+    "id": 6,
+    "name": "XYZ",
+    "email": "xyz33@gmail.com",
+    "subjects": {
+      "Mathematics": 38,
+      "Science": 60,
+      "History": 35
+    },
+    "average": 44.333333333333336,
+    "grade": "F"
+  },
+  {
+    "id": 7,
+    "name": "Prachi",
+    "email": "prachu@example.com",
+    "subjects": {
+      "Mathematics": 98,
+      "Science": 55,
+      "History": 77
+    },
+    "average": 76.66666666666667,
+    "grade": "A"
+  },
+  {
+    "id": 10,
+    "name": "test",
+    "email": "test@gmail.com",
+    "subjects": {
+      "Mathematics": 88,
+      "Science": 66,
+      "History": 55
+    },
+    "average": 69.66666666666667,
+    "grade": "B"
+  },
+  {
+    "id": 11,
+    "name": "Prachi",
+    "email": "prachu@example.com",
+    "subjects": {
+      "Mathematics": 98,
+      "Science": 55,
+      "History": 77
+    },
+    "average": 76.66666666666667,
+    "grade": "A"
+  }
+]

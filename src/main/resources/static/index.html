@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Student Performance Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        input, button {
+            padding: 6px 12px;
+            margin: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 0 5px #ccc;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+
+        tr:hover {
+            background: #f1f1f1;
+        }
+
+        .form {
+            max-width: 600px;
+            margin: auto;
+            margin-bottom: 20px;
+        }
+
+        .form input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Student Performance Management</h1>
+
+<div class="controls">
+    <input type="text" id="searchInput" placeholder="Search by name..." />
+    <button onclick="searchStudent()">Search</button>
+    <button onclick="resetSearch()">Reset</button>
+    <button onclick="openForm()">Add Student</button>
+</div>
+
+<div class="form" id="studentForm" style="display: none;">
+    <input type="hidden" id="studentId" />
+    <input type="text" id="name" placeholder="Name" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="number" id="subject1" placeholder="Mathematics (0–100)" required />
+    <input type="number" id="subject2" placeholder="Science (0–100)" required />
+    <input type="number" id="subject3" placeholder="History (0–100)" required />
+    <button onclick="submitStudent()">Submit</button>
+    <button onclick="closeForm()">Cancel</button>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th onclick="sortBy('average')">Average ⬍</th>
+        <th onclick="sortBy('grade')">Grade ⬍</th>
+        <th onclick="sortBy('name')">Name</th>
+        <th>Email</th>
+        <th>Mathematics</th>
+        <th>Science</th>
+        <th>History</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody id="studentTableBody"></tbody>
+</table>
+
+<script>
+    let students = [];
+    let currentSort = { key: '', asc: true };
+
+    async function fetchStudents() {
+        const res = await fetch("http://localhost:8080/students");
+        students = await res.json();
+        renderTable(students);
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById("studentTableBody");
+        tbody.innerHTML = '';
+        data.forEach(student => {
+            const subjects = student.subjects || {};
+            const row = `
+          <tr>
+            <td>${student.average?.toFixed(2) || 0}</td>
+            <td>${student.grade || ''}</td>
+            <td>${student.name}</td>
+            <td>${student.email}</td>
+            <td>${subjects.Mathematics || ''}</td>
+            <td>${subjects.Science || ''}</td>
+            <td>${subjects.History || ''}</td>
+            <td>
+              <button onclick="editStudent(${student.id})">Edit</button>
+              <button onclick="deleteStudent(${student.id})">Delete</button>
+            </td>
+          </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function openForm() {
+        document.getElementById("studentForm").style.display = 'block';
+        document.getElementById("studentId").value = '';
+        document.getElementById("name").value = '';
+        document.getElementById("email").value = '';
+        document.getElementById("subject1").value = '';
+        document.getElementById("subject2").value = '';
+        document.getElementById("subject3").value = '';
+    }
+
+    function closeForm() {
+        document.getElementById("studentForm").style.display = 'none';
+    }
+
+    async function submitStudent() {
+        const id = document.getElementById("studentId").value;
+        const student = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            subjects: {
+                Mathematics: parseInt(document.getElementById("subject1").value),
+                Science: parseInt(document.getElementById("subject2").value),
+                History: parseInt(document.getElementById("subject3").value)
+            }
+        };
+
+        if (id) student.id = parseInt(id);
+
+        const url = id
+            ? `http://localhost:8080/students/${id}`
+            : "http://localhost:8080/students";
+
+        const method = id ? "PUT" : "POST";
+
+        await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(student)
+        });
+
+        closeForm();
+        fetchStudents();
+    }
+
+    async function deleteStudent(id) {
+        await fetch(`http://localhost:8080/students/${id}`, { method: "DELETE" });
+        fetchStudents();
+    }
+
+    function editStudent(id) {
+        const student = students.find(s => s.id === id);
+        if (!student) return;
+
+        const subjects = student.subjects || {};
+        document.getElementById("studentId").value = student.id;
+        document.getElementById("name").value = student.name;
+        document.getElementById("email").value = student.email;
+        document.getElementById("subject1").value = subjects.Mathematics || '';
+        document.getElementById("subject2").value = subjects.Science || '';
+        document.getElementById("subject3").value = subjects.History || '';
+
+        openForm();
+    }
+
+    function sortBy(key) {
+        currentSort.asc = currentSort.key === key ? !currentSort.asc : true;
+        currentSort.key = key;
+        students.sort((a, b) => {
+            let valA = a[key];
+            let valB = b[key];
+            if (typeof valA === 'string') {
+                valA = valA.toLowerCase();
+                valB = valB.toLowerCase();
+            }
+            return currentSort.asc ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+        });
+        renderTable(students);
+    }
+
+    async function searchStudent() {
+        const query = document.getElementById("searchInput").value.trim();
+        if (query === '') {
+            fetchStudents();
+            return;
+        }
+        const res = await fetch(`http://localhost:8080/students/search?name=${query}`);
+        const filtered = await res.json();
+        renderTable(filtered);
+    }
+
+    function resetSearch() {
+        document.getElementById("searchInput").value = '';
+        fetchStudents();
+    }
+
+    // Load on start
+    fetchStudents();
+</script>
+</body>
+</html>
